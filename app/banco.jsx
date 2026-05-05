@@ -10,13 +10,52 @@ export default function Banco() {
     const [dados, setDados] = useState([]);
 
     useEffect(() => {
+
         db.execSync("CREATE TABLE IF NOT EXISTS dados (id INTEGER PRIMARY KEY AUTOINCREMENT, valor TEXT)");
+
+        // Perceba que a linha acima é uma chamada SINCRONA, ou seja
+        // ela trava a execução até que tenha terminado sua atribuição.
+        // Nesse caso é importante que seja assim, pois não seria 
+        // possivel carregar dados de uma tabela inexistente.
+        carregarItems();
     }, []);
+
+    function inserirItem(){
+        // Verifica se há alguma coisa escrita dentro do estado
+        // A função "trim" remove todos os expaços em excesso de
+        // string, se houverem apenas espaços, tudo é removido
+        if(!valor.trim()){
+            // Entrada inválida não salve coisa alguma!
+            return;
+        }
+
+        // "?" é o que chamamos de "placeholder" do sql, tal "placeholder"
+        // reserva espaço para o valor que será informado depois, no nosso
+        // caso o valor vem do estado "valor" declarado anteriormente.
+        db.runAsync("insert into dados (valor) values (?)", [valor]).then(
+            () => {
+                setValor("")
+            }
+        )
+    }
+
+    function carregarItems(){
+        db.getAllAsync("select * from dados;").then(
+
+            // Tanto faz o nome da variável: Ela é
+            // apenas um receptáculo para os dados
+            // que vem do banco de dados.
+            (listaDoValoresRecuperados) => {
+                setDados(listaDoValoresRecuperados);
+            }
+        )
+    }
 
 
     function atualizarDados() {
-        setDados([...dados, valor]);
-        setValor("");
+        // setDados([...dados, valor]);
+        inserirItem();
+        carregarItems();
     }
 
     return (
@@ -37,11 +76,11 @@ export default function Banco() {
                     data={dados}
                     renderItem={
                         ({ item }) =>
-                            <Text>{item}</Text>
+                            <Text>{item.valor}</Text>
                     }
                     keyExtractor={
-                        (item, index) =>
-                            index.toString()
+                        (item) =>
+                            item.id.toString()
                     }
                 />
             </View>
