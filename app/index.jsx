@@ -20,6 +20,12 @@ export default function Index() {
         onPress={() => roteador.push("./cep")}
       />
 
+      <Button
+        title="Abrir banco"
+        onPress={() => roteador.push("./banco")}
+      />
+
+
     </View>
   );
 }
