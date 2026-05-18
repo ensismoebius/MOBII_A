@@ -8,6 +8,8 @@ export default function Banco() {
 
     const [valor, setValor] = useState("");
     const [dados, setDados] = useState([]);
+    const [idDoValorEditado, setIdDoValorEditado] = useState(0);
+    const [editando, setEditando] = useState(false);
 
     useEffect(() => {
 
@@ -20,11 +22,11 @@ export default function Banco() {
         carregarItems();
     }, []);
 
-    function inserirItem(){
+    function inserirItem() {
         // Verifica se há alguma coisa escrita dentro do estado
         // A função "trim" remove todos os expaços em excesso de
         // string, se houverem apenas espaços, tudo é removido
-        if(!valor.trim()){
+        if (!valor.trim()) {
             // Entrada inválida não salve coisa alguma!
             return;
         }
@@ -39,7 +41,41 @@ export default function Banco() {
         )
     }
 
-    function carregarItems(){
+
+
+
+
+    function atualizaItem() {
+        // Verifica se há alguma coisa escrita dentro do estado
+        // A função "trim" remove todos os expaços em excesso de
+        // string, se houverem apenas espaços, tudo é removido
+        if (!valor.trim()) {
+            // Entrada inválida não salve coisa alguma!
+            return;
+        }
+
+        // "?" é o que chamamos de "placeholder" do sql, tal "placeholder"
+        // reserva espaço para o valor que será informado depois, no nosso
+        // caso o valor vem do estado "valor" declarado anteriormente.
+        db.runAsync(
+            "update dados set valor = ? where id = ?",
+            [valor, idDoValorEditado]
+        ).then(
+            () => {
+                setValor("")
+            }
+        )
+    }
+
+
+
+
+
+
+
+
+
+    function carregarItems() {
         db.getAllAsync("select * from dados;").then(
 
             // Tanto faz o nome da variável: Ela é
@@ -75,8 +111,20 @@ export default function Banco() {
                 <FlatList
                     data={dados}
                     renderItem={
-                        ({ item }) =>
-                            <Text>{item.valor}</Text>
+                        ({ item }) => (
+                            <>
+                                <Text>{item.valor}</Text>
+                                <Button
+                                    onPress={
+                                        () => {
+                                            setIdDoValorEditado(item.id);
+                                            setEditando(true);
+                                        }
+                                    }
+                                    title={editando ? "Editando..." : "Editar"}
+                                />
+                            </>
+                        )
                     }
                     keyExtractor={
                         (item) =>
