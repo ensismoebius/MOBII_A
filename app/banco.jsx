@@ -67,13 +67,10 @@ export default function Banco() {
         )
     }
 
-
-
-
-
-
-
-
+    function atualizarDados(){
+        atualizaItem()
+        carregarItems()
+    }
 
     function carregarItems() {
         db.getAllAsync("select * from dados;").then(
@@ -88,8 +85,7 @@ export default function Banco() {
     }
 
 
-    function atualizarDados() {
-        // setDados([...dados, valor]);
+    function inserirDados() {
         inserirItem();
         carregarItems();
     }
@@ -103,8 +99,18 @@ export default function Banco() {
                 onChangeText={setValor}
             />
             <Button
-                title="Enviar"
-                onPress={atualizarDados}
+                title={editando ? "Atualizar" : "Salvar"}
+                onPress={
+                    () => {
+                        if(editando){
+                            atualizarDados()
+                            setEditando(false)
+                            setValor("")
+                        }else{
+                            inserirDados()
+                        }
+                    }
+                }
             />
             <View>
                 {/* Flatlist exibe os itens do estado "dados" de forma personalizada. A propriedade "data" contém os dados a serem exibidos, renderItem define como cada item será renderizado e finalmente keyExtrator extrai a chave única de cada item. A chave única serve para identificar cada item de forma  para que o React possa otimizar a renderização. */}
@@ -118,6 +124,7 @@ export default function Banco() {
                                     onPress={
                                         () => {
                                             setIdDoValorEditado(item.id);
+                                            setValor(item.valor)
                                             setEditando(true);
                                         }
                                     }
